@@ -86,7 +86,9 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         .setLink({ href: url })
         .run();
     } catch (e) {
-      alert(e.message);
+      if (e instanceof Error) {
+        alert(e.message);
+      }
     }
   }, [editor]);
 
