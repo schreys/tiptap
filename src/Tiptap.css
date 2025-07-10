@@ -1,0 +1,4 @@
+.is-active {
+  background: var(--tiptap-color-active);
+  color: var(--tiptap-color-text);
+}
