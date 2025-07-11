@@ -290,14 +290,7 @@ export const Tiptap = () => {
         </p>
       `);
   const onUpdate = ({ editor }: EditorEvents["update"]) => {
-    let html = editor.getHTML();
-
-    if (html === "<p></p>") {
-      html = "";
-    }
-
-    //onUpdateValue(html);
-    setValue(html);
+    setValue(editor.getHTML());
   };
 
   const editor = useEditor({
@@ -395,6 +388,22 @@ export const Tiptap = () => {
     ],
     content: value,
     onUpdate,
+    onCreate({ editor }) {
+      // Save original getHTML
+      const originalGetHTML = editor.getHTML.bind(editor);
+
+      // Override getHTML
+      editor.getHTML = () => {
+        const doc = editor.state.doc;
+
+        const isOnlyEmptyParagraph =
+          doc.childCount === 1 &&
+          doc.firstChild?.type.name === "paragraph" &&
+          doc.firstChild.content.size === 0;
+
+        return isOnlyEmptyParagraph ? "" : originalGetHTML();
+      };
+    },
   });
 
   return (
