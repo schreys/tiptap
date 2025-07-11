@@ -36,6 +36,7 @@ import {
   Zap,
   ImageIcon,
 } from "lucide-react";
+import Paragraph from "@tiptap/extension-paragraph";
 
 const MenuButton = ({
   onClick,
@@ -59,6 +60,31 @@ const MenuButton = ({
     <Icon size={18} />
   </button>
 );
+
+export const CustomParagraph = Paragraph.extend({
+  renderHTML({ node, HTMLAttributes }) {
+    const isEmpty = node.content.size === 0;
+    // Output &nbsp; for empty paragraphs in HTML export
+    return ["p", HTMLAttributes, isEmpty ? "\u00A0" : 0];
+  },
+
+  addNodeView() {
+    return ({ node }) => {
+      const dom = document.createElement("p");
+
+      // Insert <br> if empty so caret shows in editor
+      if (node.content.size === 0) {
+        dom.appendChild(document.createElement("br"));
+      }
+
+      // Let ProseMirror handle selection etc.
+      return {
+        dom,
+        contentDOM: dom,
+      };
+    };
+  },
+});
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   const addImage = useCallback(() => {
@@ -276,7 +302,10 @@ export const Tiptap = () => {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        paragraph: false, // disable default paragraph
+      }),
+      CustomParagraph,
       Underline,
       TextStyle,
       Color,
