@@ -10,6 +10,8 @@ import { Color } from "@tiptap/extension-color";
 import TextStyle from "@tiptap/extension-text-style";
 import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
+import Emoji, { emojis } from "@tiptap/extension-emoji";
+import Image from "@tiptap/extension-image";
 import "./Tiptap.css";
 import { useCallback, useState } from "react";
 import {
@@ -31,6 +33,8 @@ import {
   AlignCenter,
   AlignRight,
   Paintbrush,
+  Zap,
+  ImageIcon,
 } from "lucide-react";
 
 const MenuButton = ({
@@ -57,6 +61,18 @@ const MenuButton = ({
 );
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
+  const addImage = useCallback(() => {
+    if (!editor) {
+      return null;
+    }
+
+    const url = window.prompt("URL");
+
+    if (url) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+  }, [editor]);
+
   const setLink = useCallback(() => {
     if (!editor) {
       return null;
@@ -210,6 +226,12 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         disabled={!editor.can().redo()}
         label="Redo"
       />
+      <MenuButton
+        onClick={() => editor.chain().focus().setEmoji("zap").run()}
+        icon={Zap}
+        label="Zap Emoji"
+      />
+      <MenuButton onClick={addImage} icon={ImageIcon} label="Insert Image" />
     </div>
   );
 };
@@ -260,6 +282,15 @@ export const Tiptap = () => {
       Color,
       TextAlign.configure({
         types: ["heading", "paragraph"],
+      }),
+      Emoji.configure({
+        emojis: emojis,
+        enableEmoticons: true,
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          width: "100%",
+        },
       }),
       Link.configure({
         openOnClick: false,
