@@ -300,6 +300,7 @@ export const Tiptap = () => {
     extensions: [
       StarterKit.configure({
         paragraph: false, // disable default paragraph
+        trailingNode: false, // this will not add an empty paragraph after an image
       }),
       CustomParagraph,
       TextStyle,
@@ -311,11 +312,7 @@ export const Tiptap = () => {
         emojis: emojis,
         enableEmoticons: true,
       }),
-      Image.configure({
-        HTMLAttributes: {
-          width: "100%",
-        },
-      }),
+      Image,
     ],
     content: value,
     onUpdate,
