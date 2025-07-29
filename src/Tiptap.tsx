@@ -3,13 +3,13 @@ import {
   EditorContent,
   type EditorEvents,
   Editor,
+  mergeAttributes,
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
+
 import { Color } from "@tiptap/extension-color";
-import TextStyle from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
 import TextAlign from "@tiptap/extension-text-align";
-import Link from "@tiptap/extension-link";
 import Emoji, { emojis } from "@tiptap/extension-emoji";
 import Image from "@tiptap/extension-image";
 import "./Tiptap.css";
@@ -69,8 +69,11 @@ export const CustomParagraph = Paragraph.extend({
   },
 
   addNodeView() {
-    return ({ node }) => {
+    return ({ node, HTMLAttributes }) => {
       const dom = document.createElement("p");
+
+      // Apply TipTap-provided attributes like style/class
+      Object.assign(dom, mergeAttributes(HTMLAttributes));
 
       // Insert <br> if empty so caret shows in editor
       if (node.content.size === 0) {
@@ -299,7 +302,6 @@ export const Tiptap = () => {
         paragraph: false, // disable default paragraph
       }),
       CustomParagraph,
-      Underline,
       TextStyle,
       Color,
       TextAlign.configure({
@@ -312,77 +314,6 @@ export const Tiptap = () => {
       Image.configure({
         HTMLAttributes: {
           width: "100%",
-        },
-      }),
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-        defaultProtocol: "https",
-        protocols: ["http", "https"],
-        isAllowedUri: (url, ctx) => {
-          try {
-            // construct URL
-            const parsedUrl = url.includes(":")
-              ? new URL(url)
-              : new URL(`${ctx.defaultProtocol}://${url}`);
-
-            // use default validation
-            if (!ctx.defaultValidate(parsedUrl.href)) {
-              return false;
-            }
-
-            // disallowed protocols
-            const disallowedProtocols = ["ftp", "file", "mailto"];
-            const protocol = parsedUrl.protocol.replace(":", "");
-
-            if (disallowedProtocols.includes(protocol)) {
-              return false;
-            }
-
-            // only allow protocols specified in ctx.protocols
-            const allowedProtocols = ctx.protocols.map((p) =>
-              typeof p === "string" ? p : p.scheme
-            );
-
-            if (!allowedProtocols.includes(protocol)) {
-              return false;
-            }
-
-            // disallowed domains
-            const disallowedDomains = [
-              "example-phishing.com",
-              "malicious-site.net",
-            ];
-            const domain = parsedUrl.hostname;
-
-            if (disallowedDomains.includes(domain)) {
-              return false;
-            }
-
-            // all checks have passed
-            return true;
-          } catch {
-            return false;
-          }
-        },
-        shouldAutoLink: (url) => {
-          try {
-            // construct URL
-            const parsedUrl = url.includes(":")
-              ? new URL(url)
-              : new URL(`https://${url}`);
-
-            // only auto-link if the domain is not in the disallowed list
-            const disallowedDomains = [
-              "example-no-autolink.com",
-              "another-no-autolink.com",
-            ];
-            const domain = parsedUrl.hostname;
-
-            return !disallowedDomains.includes(domain);
-          } catch {
-            return false;
-          }
         },
       }),
     ],
