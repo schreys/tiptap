@@ -90,6 +90,7 @@ export const CustomParagraph = Paragraph.extend({
 });
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
+  console.log("MenuBar rendered");
   const addImage = useCallback(() => {
     if (!editor) {
       return null;
@@ -297,6 +298,7 @@ export const Tiptap = () => {
   };
 
   const editor = useEditor({
+    shouldRerenderOnTransaction: true, // re-render on every transaction so the toolbar updates
     extensions: [
       StarterKit.configure({
         paragraph: false, // disable default paragraph
