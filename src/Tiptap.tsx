@@ -75,8 +75,32 @@ const OfficePastePlugin = new Plugin({
   key: new PluginKey("office-paste"),
   props: {
     transformPastedHTML(html: string): string {
-      console.log("Original HTML:", html);
-      return html.replace(/<br[^>]*>/gi, ""); // Remove <br> tags
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+
+      doc.querySelectorAll("[style]").forEach((el) => {
+        const style = el.getAttribute("style");
+        if (!style) return;
+
+        const cleaned = style
+          .split(";")
+          .map((part) => part.trim())
+          .filter(
+            (part) =>
+              part &&
+              !/^color\s*:/.test(part) &&
+              !/^background(-color)?\s*:/.test(part)
+          )
+          .join("; ");
+
+        if (cleaned) {
+          el.setAttribute("style", cleaned);
+        } else {
+          el.removeAttribute("style");
+        }
+      });
+
+      return doc.body.innerHTML;
     },
   },
 });
