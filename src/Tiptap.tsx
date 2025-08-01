@@ -4,6 +4,7 @@ import {
   type EditorEvents,
   Editor,
   mergeAttributes,
+  Extension,
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 
@@ -37,6 +38,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import Paragraph from "@tiptap/extension-paragraph";
+import { Plugin, PluginKey } from "prosemirror-state";
 
 const MenuButton = ({
   onClick,
@@ -60,6 +62,24 @@ const MenuButton = ({
     <Icon size={18} />
   </button>
 );
+
+const OfficePaste = Extension.create({
+  name: "office-paste",
+
+  addProseMirrorPlugins() {
+    return [OfficePastePlugin];
+  },
+});
+
+const OfficePastePlugin = new Plugin({
+  key: new PluginKey("office-paste"),
+  props: {
+    transformPastedHTML(html: string): string {
+      console.log("Original HTML:", html);
+      return html.replace(/<br[^>]*>/gi, ""); // Remove <br> tags
+    },
+  },
+});
 
 export const CustomParagraph = Paragraph.extend({
   renderHTML({ node, HTMLAttributes }) {
@@ -90,7 +110,6 @@ export const CustomParagraph = Paragraph.extend({
 });
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
-  console.log("MenuBar rendered");
   const addImage = useCallback(() => {
     if (!editor) {
       return null;
@@ -305,6 +324,7 @@ export const Tiptap = () => {
         trailingNode: false, // this will not add an empty paragraph after an image
       }),
       CustomParagraph,
+      OfficePaste,
       TextStyle,
       Color,
       TextAlign.configure({
